@@ -22,5 +22,50 @@ This project combines procedural maze generation with a memory-based reinforceme
 - **Interactive Web Interface:**  
   Streamlit is used to provide an interactive interface where users can generate mazes, train the agent, and view animations of the solving process.
 
-## Project Structure
 
+## Usage
+
+    Run the Streamlit App:
+
+    streamlit run app.py
+
+    Interact with the App:
+
+        Generate Maze:
+        Use the slider to adjust the maze size and click "Generate Maze" to create a new maze.
+
+        Train LSTM Agent:
+        Click "Train LSTM Agent" to train the RL agent on the generated maze. A plot of the training rewards per episode is displayed.
+
+        Solve Maze:
+        Once trained, click "Solve Maze" to generate a solution path (using a placeholder BFS method) and visualize it on the maze.
+
+        Animate Solve Maze:
+        Click "Animate Solve Maze" to see an animated step-by-step visualization of the maze being solved.
+
+## Project Components
+
+    Maze Generation:
+    Implemented in maze_generator.py using a recursive DFS approach. The generator creates a perfect maze with one unique path between any two points.
+
+    Maze Environment:
+    Defined in environment.py, this Gymnasium-compatible environment sets up the maze, defines the action space (up, right, down, left), and provides methods for resetting and stepping through the maze.
+
+    RL Agent Training:
+    The training routine in train_agent.py leverages Recurrent PPO from sb3-contrib to train an LSTM-based policy. The training loop collects rewards and updates the agent's policy.
+
+    Visualization:
+    The application visualizes the maze, training progress, and solution path. Animation is created by generating frames with Matplotlib and compiling them into a GIF with imageio.
+
+## Future Work
+
+    Agent Improvement:
+    Explore more advanced memory-based architectures and fine-tune the LSTM network for better performance.
+
+    Enhanced Maze Complexity:
+    Introduce varying levels of maze complexity and additional features (e.g., dynamic obstacles).
+
+    Real-Time Training Visualization:
+    Implement real-time visual updates during agent training for better insight into the learning process.
+
+Happy Maze Solving!
