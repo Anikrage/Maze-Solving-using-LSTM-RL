@@ -1,0 +1,5 @@
+streamlit
+stable-baselines3[extra]
+gym
+matplotlib
+numpy
