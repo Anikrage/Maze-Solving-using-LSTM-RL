@@ -1,6 +1,6 @@
 import gymnasium as gym
 from stable_baselines3 import PPO
-from maze_env import MazeEnv
+from environment import MazeEnv
 
 def run_agent():
     env = MazeEnv(size=10)
