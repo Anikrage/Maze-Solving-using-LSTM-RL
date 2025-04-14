@@ -1,6 +1,5 @@
 import numpy as np
 import random
-from collections import deque
 
 class MazeGenerator:
     def __init__(self, size, seed=None):
@@ -27,9 +26,12 @@ class MazeGenerator:
                     grid[maze_row + dr][maze_col + dc] = 0
                     dfs(new_row, new_col)
 
-        dfs(self.rng.randint(0, size), self.rng.randint(0, size))
+        # Start from a random cell
+        start_row = self.rng.randint(0, size)
+        start_col = self.rng.randint(0, size)
+        dfs(start_row, start_col)
 
-        # Entrance & Exit
+        # Create entrance and exit
         grid[1][0] = 0
         grid[size * 2 - 1][size * 2] = 0
 

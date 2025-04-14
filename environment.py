@@ -7,11 +7,13 @@ class MazeEnv(gym.Env):
     def __init__(self, maze):
         super(MazeEnv, self).__init__()
         self.maze = maze
-        self.start = (1, 0)
-        self.goal = (maze.shape[0] - 2, maze.shape[1] - 1)
+        self.start = (1, 0)  # Entrance
+        self.goal = (maze.shape[0] - 2, maze.shape[1] - 1)  # Exit
         self.state = self.start
+
+        # Observation: full maze grid with agent position marked as 2
         self.observation_space = spaces.Box(low=0, high=2, shape=maze.shape, dtype=np.uint8)
-        self.action_space = spaces.Discrete(4)
+        self.action_space = spaces.Discrete(4)  # 0: Up, 1: Right, 2: Down, 3: Left
 
     def _get_obs(self):
         obs = self.maze.copy().astype(np.uint8)
@@ -27,11 +29,17 @@ class MazeEnv(gym.Env):
     def step(self, action):
         row, col = self.state
         new_row, new_col = row, col
-        if action == 0: new_row -= 1
-        elif action == 1: new_col += 1
-        elif action == 2: new_row += 1
-        elif action == 3: new_col -= 1
 
+        if action == 0:  # Up
+            new_row -= 1
+        elif action == 1:  # Right
+            new_col += 1
+        elif action == 2:  # Down
+            new_row += 1
+        elif action == 3:  # Left
+            new_col -= 1
+
+        # Check boundaries and wall collision
         if 0 <= new_row < self.maze.shape[0] and 0 <= new_col < self.maze.shape[1]:
             if self.maze[new_row, new_col] == 0:
                 self.state = (new_row, new_col)
@@ -44,13 +52,14 @@ class MazeEnv(gym.Env):
         if model is not None:
             obs, _ = self.reset()
             path = [self.state]
-            for _ in range(500):
+            for _ in range(500):  # Maximum allowed steps
                 action, _ = model.predict(obs)
                 obs, _, done, _, _ = self.step(action)
                 path.append(self.state)
                 if done:
                     return path
-            return None
+            return None  # Agent failed to reach the goal within allowed steps
+        # Fallback to BFS if no model is provided
         start = self.start
         goal = self.goal
         queue = deque([start])
@@ -58,7 +67,8 @@ class MazeEnv(gym.Env):
 
         while queue:
             current = queue.popleft()
-            if current == goal: break
+            if current == goal:
+                break
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 neighbor = (current[0] + dx, current[1] + dy)
                 if (0 <= neighbor[0] < self.maze.shape[0] and
@@ -68,8 +78,11 @@ class MazeEnv(gym.Env):
                     queue.append(neighbor)
                     came_from[neighbor] = current
 
-        if goal not in came_from: return None
-        path, current = [], goal
+        if goal not in came_from:
+            return None
+
+        path = []
+        current = goal
         while current is not None:
             path.append(current)
             current = came_from[current]
