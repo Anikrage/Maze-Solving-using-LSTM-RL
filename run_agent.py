@@ -1,11 +1,10 @@
-import torch
+import gymnasium as gym
 from stable_baselines3 import PPO
 from environment import MazeEnv
 
 def run_agent():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    env = MazeEnv(maze)  # Create your maze appropriately
-    model = PPO.load("maze_solver_agent.zip", device=device)
+    env = MazeEnv(size=10)
+    model = PPO.load("maze_solver_agent")
 
     state, _ = env.reset()
     done = False

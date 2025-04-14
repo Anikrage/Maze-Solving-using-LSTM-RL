@@ -16,17 +16,20 @@ class MazeEnv(gym.Env):
         self.action_space = spaces.Discrete(4)  # 0: Up, 1: Right, 2: Down, 3: Left
 
     def _get_obs(self):
+        """Return a copy of the maze with the agent's position marked."""
         obs = self.maze.copy().astype(np.uint8)
         row, col = self.state
         obs[row, col] = 2
         return obs
 
     def reset(self, seed=None, options=None):
+        """Reset environment state and return observation."""
         super().reset(seed=seed)
         self.state = self.start
         return self._get_obs(), {}
 
     def step(self, action):
+        """Execute one step in the environment."""
         row, col = self.state
         new_row, new_col = row, col
 
@@ -46,20 +49,20 @@ class MazeEnv(gym.Env):
 
         done = self.state == self.goal
         reward = 1 if done else -0.1
-        return self._get_obs(), reward, done, False, {}
+        truncated = False
+        return self._get_obs(), reward, done, truncated, {}
 
-    def solve_with_trained_agent(self, model=None):
-        if model is not None:
-            obs, _ = self.reset()
-            path = [self.state]
-            for _ in range(500):  # Maximum allowed steps
-                action, _ = model.predict(obs)
-                obs, _, done, _, _ = self.step(action)
-                path.append(self.state)
-                if done:
-                    return path
-            return None  # Agent failed to reach the goal within allowed steps
-        # Fallback to BFS if no model is provided
+    def render(self):
+        """Print the maze with the agent's current position (for debugging)."""
+        obs = self._get_obs()
+        print(obs)
+
+    def solve_with_trained_agent(self):
+        """
+        Use BFS to find a solution path from start to goal.
+        This is a placeholder for the trained agent's policy.
+        Returns a list of coordinates representing the path.
+        """
         start = self.start
         goal = self.goal
         queue = deque([start])
@@ -69,8 +72,10 @@ class MazeEnv(gym.Env):
             current = queue.popleft()
             if current == goal:
                 break
+
             for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
                 neighbor = (current[0] + dx, current[1] + dy)
+                # Ensure neighbor is within bounds and is a path (0)
                 if (0 <= neighbor[0] < self.maze.shape[0] and
                     0 <= neighbor[1] < self.maze.shape[1] and
                     self.maze[neighbor] == 0 and
@@ -78,9 +83,11 @@ class MazeEnv(gym.Env):
                     queue.append(neighbor)
                     came_from[neighbor] = current
 
+        # If the goal was not reached, return None
         if goal not in came_from:
             return None
 
+        # Reconstruct path from goal to start
         path = []
         current = goal
         while current is not None:
